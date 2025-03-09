@@ -4,7 +4,6 @@ import pandas as pd
 import os
 from dotenv import load_dotenv
 import spacy
-from spacy.util import get_package_path
 import subprocess
 
 # Load environment variables from .env file
@@ -20,12 +19,17 @@ openai.api_key = OPENAI_API_KEY
 # Load NLP model with a check
 model_name = 'en_core_web_sm'
 
-try:
-    nlp = spacy.load(model_name)
-except OSError:
-    print(f"Downloading the model {model_name} as it is not available.")
-    subprocess.run(['python', '-m', 'spacy', 'download', model_name])
-    nlp = spacy.load(model_name)
+def load_spacy_model(model_name):
+    try:
+        nlp = spacy.load(model_name)
+    except OSError:
+        print(f"Downloading the model {model_name} as it is not available.")
+        subprocess.run(['python', '-m', 'spacy', 'download', model_name], check=True)
+        nlp = spacy.load(model_name)
+    return nlp
+
+# Load the Spacy model
+nlp = load_spacy_model(model_name)
 
 def generate_sql_query(question):
     # Advanced NLP to understand the question
